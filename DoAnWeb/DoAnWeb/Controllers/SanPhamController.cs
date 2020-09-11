@@ -15,6 +15,7 @@ namespace DoAnWeb.Controllers
         {
             var all_sp = from sp in data.SANPHAMs where sp.MATH==id || sp.MATUOI==id || sp.MALOAI==id || sp.MACL==id select sp;
             return View(all_sp);
+
         }
         
         public ActionResult CTSanPham(string id)

@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Linq.Dynamic;
 using System.Reflection;
+using DoAnWeb.Models;
 namespace DoAnWeb.Controllers
 {
     public class AdminController : Controller
@@ -160,108 +161,113 @@ namespace DoAnWeb.Controllers
         //    var sach = Danhsachsp();
         //    return View(sach.ToPagedList(pageNum,pageSize));
         //}
-        public ActionResult Index(string sortProperty, string sortOrder, string searchString, int? size, int? page)
+        public ActionResult Index()
         {
-            if (Session["Admin"] == null)
-                return RedirectToAction("DangNhap", "DangKy_DangNhap");
-            else
-            {
-                if (sortOrder == "asc") ViewBag.SortOrder = "desc";
-                if (sortOrder == "desc") ViewBag.SortOrder = "";
-                if (sortOrder == "") ViewBag.SortOrder = "asc";
-
-                ViewBag.searchValue = searchString;
-                ViewBag.sortProperty = sortProperty;
-                ViewBag.page = page;
-
-                List<SelectListItem> items = new List<SelectListItem>();
-                items.Add(new SelectListItem { Text = "10", Value = "10" });
-                items.Add(new SelectListItem { Text = "20", Value = "20" });
-                items.Add(new SelectListItem { Text = "25", Value = "25" });
-                items.Add(new SelectListItem { Text = "50", Value = "50" });
-                items.Add(new SelectListItem { Text = "100", Value = "100" });
-                items.Add(new SelectListItem { Text = "200", Value = "200" });
-
-                foreach (var item in items)
-                {
-                    if (item.Selected.ToString().Equals(size.ToString()) == true) item.Selected = true;
-                }
-                ViewBag.size = items;
-                ViewBag.currentSize = size;
-
-                var properties = typeof(SANPHAM).GetProperties();
-
-                List<Tuple<string, bool, int>> list = new List<Tuple<string, bool, int>>();
-                foreach (var item in properties)
-                {
-                    int order = 999;
-                    var isVirtual = item.GetAccessors()[0].IsVirtual;
-                    if (item.Name == "MASP") order = 1;
-                    if (item.Name == "TENSP") order = 2;
-                    if (item.Name == "HINHANH") order = 3;
-                    if (item.Name == "DONGIA") order = 4;
-                    if (item.Name == "LOAI") continue;
-                    if (item.Name == "THUONGHIEU") continue;
-                    if (item.Name == "CHATLIEU") continue;
-                    if (item.Name == "CHITIETHDs") continue;
-                    if (item.Name == "TUOI") continue;
-                    Tuple<string, bool, int> t = new Tuple<string, bool, int>(item.Name, isVirtual, order);
-                    list.Add(t);
-                }
-                list = list.OrderBy(x => x.Item3).ToList();
-
-                foreach (var item in list)
-                {
-                    // 2.2. Thuộc tính bình thường thì cho phép sắp xếp
-                    if (!item.Item2) // Item2 dùng để kiểm tra thuộc tính ảo hay không?
-                    {
-                        // 2.3. So thuộc tính sortProperty và sortOrder để biết thuộc tính nào cần thay biểu tượng sắp giảm
-                        if (sortOrder == "desc" && sortProperty == item.Item1)
-                        {
-                            ViewBag.Headings += "<th><a href='?sortProperty=" + item.Item1 + "&sortOrder=" +
-                                ViewBag.SortOrder + "&searchString=" + searchString + "'>" + item.Item1 + "<i class='fa fa-fw fa-sort-desc'></i></th></a></th>";
-                        }
-                        else if (sortOrder == "asc" && sortProperty == item.Item1)
-                        {
-                            ViewBag.Headings += "<th><a href='?sortProperty=" + item.Item1 + "&sortOrder=" +
-                                ViewBag.SortOrder + "&searchString=" + searchString + "'>" + item.Item1 + "<i class='fa fa-fw fa-sort-asc'></a></th>";
-                        }
-                        else
-                        {
-                            ViewBag.Headings += "<th><a href='?sortProperty=" + item.Item1 + "&sortOrder=" +
-                               ViewBag.SortOrder + "&searchString=" + searchString + "'>" + item.Item1 + "<i class='fa fa-fw fa-sort'></a></th>";
-                        }
-
-                    }
-                    // 2.4. Thuộc tính virtual (public virtual Category Category...) thì không sắp xếp được
-                    // cho nên không cần tạo liên kết
-                    else ViewBag.Headings += "<th>" + item.Item1 + "</th>";
-                }
-
-                var sp = from l in data.SANPHAMs select l;
-
-                // 4. Tạo thuộc tính sắp xếp mặc định là "LinkID"
-                if (String.IsNullOrEmpty(sortProperty)) sortProperty = "MASP";
-
-                // 5. Sắp xếp tăng/giảm bằng phương thức OrderBy sử dụng trong thư viện Dynamic LINQ
-                if (sortOrder == "desc") sp = sp.OrderBy(sortProperty + " desc");
-                else if (sortOrder == "asc") sp = sp.OrderBy(sortProperty);
-                else sp = sp.OrderBy("MASP");
-
-                // 5.1. Thêm phần tìm kiếm
-                if (!String.IsNullOrEmpty(searchString))
-                {
-                    sp = sp.Where(s => s.TENSP.Contains(searchString));
-                }
-                page = page ?? 1;
-                int pageSize = (size ?? 10);
-                ViewBag.pageSize = pageSize;
-                int pageNumber = (page ?? 1);
-                int checkTotal = (int)(sp.ToList().Count / pageSize) + 1;
-                if (pageNumber > checkTotal) pageNumber = checkTotal;
-                return View(sp.ToPagedList(pageNumber, pageSize));
-            }
+            return View();
         }
+        //public ActionResult Index(string sortProperty, string sortOrder, string searchString, int? size, int? page)
+        //{
+
+        //    if (Session["Admin"] == null)
+        //        return RedirectToAction("DangNhap", "DangKy_DangNhap");
+        //    else
+        //    {
+        //        if (sortOrder == "asc") ViewBag.SortOrder = "desc";
+        //        if (sortOrder == "desc") ViewBag.SortOrder = "";
+        //        if (sortOrder == "") ViewBag.SortOrder = "asc";
+
+        //        ViewBag.searchValue = searchString;
+        //        ViewBag.sortProperty = sortProperty;
+        //        ViewBag.page = page;
+
+        //        List<SelectListItem> items = new List<SelectListItem>();
+        //        items.Add(new SelectListItem { Text = "10", Value = "10" });
+        //        items.Add(new SelectListItem { Text = "20", Value = "20" });
+        //        items.Add(new SelectListItem { Text = "25", Value = "25" });
+        //        items.Add(new SelectListItem { Text = "50", Value = "50" });
+        //        items.Add(new SelectListItem { Text = "100", Value = "100" });
+        //        items.Add(new SelectListItem { Text = "200", Value = "200" });
+
+        //        foreach (var item in items)
+        //        {
+        //            if (item.Selected.ToString().Equals(size.ToString()) == true) item.Selected = true;
+        //        }
+        //        ViewBag.size = items;
+        //        ViewBag.currentSize = size;
+
+        //        var properties = typeof(SANPHAM).GetProperties();
+
+        //        List<Tuple<string, bool, int>> list = new List<Tuple<string, bool, int>>();
+        //        foreach (var item in properties)
+        //        {
+        //            int order = 999;
+        //            var isVirtual = item.GetAccessors()[0].IsVirtual;
+        //            if (item.Name == "MASP") order = 1;
+        //            if (item.Name == "TENSP") order = 2;
+        //            if (item.Name == "HINHANH") order = 3;
+        //            if (item.Name == "DONGIA") order = 4;
+        //            if (item.Name == "LOAI") continue;
+        //            if (item.Name == "THUONGHIEU") continue;
+        //            if (item.Name == "CHATLIEU") continue;
+        //            if (item.Name == "CHITIETHDs") continue;
+        //            if (item.Name == "TUOI") continue;
+        //            Tuple<string, bool, int> t = new Tuple<string, bool, int>(item.Name, isVirtual, order);
+        //            list.Add(t);
+        //        }
+        //        list = list.OrderBy(x => x.Item3).ToList();
+
+        //        foreach (var item in list)
+        //        {
+        //            // 2.2. Thuộc tính bình thường thì cho phép sắp xếp
+        //            if (!item.Item2) // Item2 dùng để kiểm tra thuộc tính ảo hay không?
+        //            {
+        //                // 2.3. So thuộc tính sortProperty và sortOrder để biết thuộc tính nào cần thay biểu tượng sắp giảm
+        //                if (sortOrder == "desc" && sortProperty == item.Item1)
+        //                {
+        //                    ViewBag.Headings += "<th><a href='?sortProperty=" + item.Item1 + "&sortOrder=" +
+        //                        ViewBag.SortOrder + "&searchString=" + searchString + "'>" + item.Item1 + "<i class='fa fa-fw fa-sort-desc'></i></th></a></th>";
+        //                }
+        //                else if (sortOrder == "asc" && sortProperty == item.Item1)
+        //                {
+        //                    ViewBag.Headings += "<th><a href='?sortProperty=" + item.Item1 + "&sortOrder=" +
+        //                        ViewBag.SortOrder + "&searchString=" + searchString + "'>" + item.Item1 + "<i class='fa fa-fw fa-sort-asc'></a></th>";
+        //                }
+        //                else
+        //                {
+        //                    ViewBag.Headings += "<th><a href='?sortProperty=" + item.Item1 + "&sortOrder=" +
+        //                       ViewBag.SortOrder + "&searchString=" + searchString + "'>" + item.Item1 + "<i class='fa fa-fw fa-sort'></a></th>";
+        //                }
+
+        //            }
+        //            // 2.4. Thuộc tính virtual (public virtual Category Category...) thì không sắp xếp được
+        //            // cho nên không cần tạo liên kết
+        //            else ViewBag.Headings += "<th>" + item.Item1 + "</th>";
+        //        }
+
+        //        var sp = from l in data.SANPHAMs select l;
+
+        //        // 4. Tạo thuộc tính sắp xếp mặc định là "LinkID"
+        //        if (String.IsNullOrEmpty(sortProperty)) sortProperty = "MASP";
+
+        //        // 5. Sắp xếp tăng/giảm bằng phương thức OrderBy sử dụng trong thư viện Dynamic LINQ
+        //        if (sortOrder == "desc") sp = sp.OrderBy(sortProperty + " desc");
+        //        else if (sortOrder == "asc") sp = sp.OrderBy(sortProperty);
+        //        else sp = sp.OrderBy("MASP");
+
+        //        // 5.1. Thêm phần tìm kiếm
+        //        if (!String.IsNullOrEmpty(searchString))
+        //        {
+        //            sp = sp.Where(s => s.TENSP.Contains(searchString));
+        //        }
+        //        page = page ?? 1;
+        //        int pageSize = (size ?? 10);
+        //        ViewBag.pageSize = pageSize;
+        //        int pageNumber = (page ?? 1);
+        //        int checkTotal = (int)(sp.ToList().Count / pageSize) + 1;
+        //        if (pageNumber > checkTotal) pageNumber = checkTotal;
+        //        return View(sp.ToPagedList(pageNumber, pageSize));
+        //    }
+        //}
         public ActionResult ChatLieu(string sortProperty, string sortOrder, string searchString, int? size, int? page)
         {
             if (Session["Admin"] == null)
